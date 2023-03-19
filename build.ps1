@@ -17,7 +17,8 @@ function AppendCommand([string]$command, [string]$commandSuffix){
 	return [ScriptBlock]::Create($command + $commandSuffix)
 }
 
-$artifacts = ".\artifacts"
+New-Item -ItemType Directory -Force .\artifacts
+$artifacts = Resolve-Path .\artifacts\ | select -ExpandProperty Path
 
 if (Test-Path $artifacts) {
 	Remove-Item $artifacts -Force -Recurse
@@ -29,7 +30,7 @@ $minorVersion = $versionSettings[0].minorVersion
 $patchVersion = $versionSettings[0].patchVersion
 
 $buildCommand =  { & dotnet build -c Release -p:MajorVersion=$majorVersion -p:MinorVersion=$minorVersion -p:PatchVersion=$patchVersion }
-$packCommand = { & dotnet pack -c Release -p:PublishDir=$artifacts --no-build -p:MajorVersion=$majorVersion -p:MinorVersion=$minorVersion -p:PatchVersion=$patchVersion }
+$packCommand = { & dotnet pack -c Release -p:PackageOutputPath=$artifacts --no-build -p:MajorVersion=$majorVersion -p:MinorVersion=$minorVersion -p:PatchVersion=$patchVersion }
 
 if($CommitId -and $VersionDistance) {	
 	$prereleaseId = $versionSettings[0].prereleaseId

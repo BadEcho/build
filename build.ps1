@@ -50,6 +50,7 @@ if($CommitId -and $VersionDistance) {
 }
 
 Execute { & msbuild -p:Configuration=Release -t:Clean }
+Execute { & msbuild -p:Configuration=Release -t:Restore }
 Execute $buildCommand 
 
 if ($SkipTests -ne $true) {	

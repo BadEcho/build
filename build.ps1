@@ -4,8 +4,7 @@ param (
 	[string]$CommitId,
 	[string]$VersionDistance,
 	# Used to specify the configuration build to use in place of Release to prevent attempts to package native projects.
-	[string]$PackageConfiguration,
-	[switch]$SkipTests
+	[string]$PackageConfiguration
 )
 
 function Execute([scriptblock]$command) {
@@ -52,9 +51,4 @@ if($CommitId -and $VersionDistance) {
 Execute { & msbuild -p:Configuration=Release -t:Clean }
 Execute { & msbuild -p:Configuration=Release -t:Restore }
 Execute $buildCommand 
-
-if ($SkipTests -ne $true) {	
-	Execute { & vstest.console /Logger:trx /ResultsDirectory:$artifacts (Get-ChildItem bin\rel\*.Tests.dll).FullName }
-}
-
 Execute $packCommand

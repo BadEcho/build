@@ -49,6 +49,6 @@ if($CommitId -and $VersionDistance) {
 }
 
 Execute { & msbuild -p:Configuration=Release -t:Clean }
-Execute { & msbuild -p:Configuration=Release -t:Restore }
+Execute { & dotnet restore /p:DisableWarnForInvalidRestoreProjects=true }
 Execute $buildCommand 
 Execute $packCommand

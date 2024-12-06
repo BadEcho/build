@@ -7,10 +7,6 @@ param (
 	[string]$PackageConfiguration
 )
 
-Write-Host "CommitId: " + $CommitId
-Write-Host "VersionDistance: " + $VersionDistance
-Write-Host "PackageConfig: " + $PackageConfiguration
-
 function Execute([scriptblock]$command) {
 	& $command
 	if ($lastexitcode -ne 0) {

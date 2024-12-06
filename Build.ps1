@@ -1,4 +1,4 @@
-# Builds the Bad Echo solution.
+# Builds Bad Echo solutions.
 
 param (
 	[string]$CommitId,

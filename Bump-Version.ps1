@@ -6,17 +6,20 @@ param (
 
 $versionSettings = Get-Content version.json | ConvertFrom-Json
 
-        switch (Patch) {
-            Major {
-                $versionSettings[0].majorVersion++
-            }
-            Minor {
-                $versionSettings[0].minorVersion++
-            }
-            Patch {
-                $versionSettings[0].patchVersion++
-            }
-        }
+switch ($ComponentToBump) {
+    Major {
+        $versionSettings[0].majorVersion++
+        $versionSettings[0].minorVersion = 0
+        $versionSettings[0].patchVersion = 0
+    }
+    Minor {
+        $versionSettings[0].minorVersion++
+        $versionSettings[0].patchVersion = 0
+    }
+    Patch {
+        $versionSettings[0].patchVersion++
+    }
+}
 
 ConvertTo-Json $versionSettings | Set-Content version1.json
 

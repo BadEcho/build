@@ -30,9 +30,9 @@ if (Test-Path $artifacts) {
 }
 
 $versionSettings = Get-Content version.json | ConvertFrom-Json
-$majorVersion = $versionSettings[0].majorVersion
-$minorVersion = $versionSettings[0].minorVersion
-$patchVersion = $versionSettings[0].patchVersion
+$majorVersion = $versionSettings.majorVersion
+$minorVersion = $versionSettings.minorVersion
+$patchVersion = $versionSettings.patchVersion
 
 $buildCommand =  { & msbuild -p:Configuration=Release -p:MajorVersion=$majorVersion -p:MinorVersion=$minorVersion -p:PatchVersion=$patchVersion }
 # If there are any native projects in the solution, then a separate configuration created specifically for use during NuGet package creation needs to be made.

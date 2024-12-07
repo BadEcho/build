@@ -23,8 +23,8 @@ switch ($ComponentToBump) {
 
 $versionSettings.prereleaseId = 'alpha'
 
-ConvertTo-Json $versionSettings | Set-Content version1.json
+ConvertTo-Json $versionSettings | Set-Content version.json
 
-git add version1.json
+git add version.json
 git commit -m "Bumping $($ComponentToBump.ToLower()) version component" 
 git push origin

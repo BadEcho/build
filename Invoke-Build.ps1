@@ -1,13 +1,14 @@
 # Builds Bad Echo solutions.
 
 param (
-	[string]$CommitId,
-	[string]$VersionDistance,
+	# If set, then a stable release build, as opposed to a pre-release build, is packaged.
+	[switch]$ReleaseBuild,
 	# Used to specify the configuration build to use in place of Release to prevent attempts to package native projects.
 	[string]$PackageConfiguration
 )
 
 function Execute([scriptblock]$command) {
+	Write-Host "Executing build command: $($command.ToString().TrimStart("& "))"
 	& $command
 	if ($lastexitcode -ne 0) {
 		throw ("Build command errored with exit code: " + $lastexitcode)
@@ -40,9 +41,11 @@ $buildCommand =  { & msbuild -p:Configuration=Release -p:MajorVersion=$majorVers
 # IsPackable element for the project, however MSBuild ignores this property and errors out anyway.
 $packCommand = { & msbuild -t:Pack -p:Configuration=$PackageConfiguration -p:PackageOutputPath=$artifacts -p:NoBuild=true -p:MajorVersion=$majorVersion -p:MinorVersion=$minorVersion -p:PatchVersion=$patchVersion }
 
-if($CommitId -and $VersionDistance) {	
+if(-Not $ReleaseBuild){
+	$commitId = git rev-parse --short HEAD
+	$versionDistance = git rev-list --count "$(git log -1 --pretty=format:"%H" version.json)..HEAD"
 	$prereleaseId = $versionSettings[0].prereleaseId		
-	$versionCommand = "-p:BuildMetadata=$CommitId -p:PrereleaseId=$prereleaseId -p:BuildNumber=$VersionDistance"
+	$versionCommand = "-p:BuildMetadata=$commitId -p:PrereleaseId=$prereleaseId -p:BuildNumber=$versionDistance"
 
 	$buildCommand = AppendCommand($buildCommand.ToString(), $versionCommand)
 	$packCommand = AppendCommand($packCommand.ToString(), $versionCommand)

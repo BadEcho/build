@@ -1,7 +1,6 @@
 # Gets the result of the most recent run for a workflow.
 
 param (
-    [string]$Owner,
     [string]$Repository,
     [string]$Branch,
     [string]$WorkflowPath
@@ -9,7 +8,7 @@ param (
 
 $conclusion = $null
 
-$allRuns = gh api "/repos/$Owner/$Repository/actions/runs" | ConvertFrom-Json
+$allRuns = gh api "/repos/$Repository/actions/runs" | ConvertFrom-Json
 $workflowRuns = $allRuns.workflow_runs.Where({$_.path -eq $WorkflowPath -and $_.head_branch -eq $Branch})
 
 if ($workflowRuns) {

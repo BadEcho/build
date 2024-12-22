@@ -6,13 +6,9 @@ param (
     [string]$WorkflowPath
 )
 
-$conclusion = $null
-
 $allRuns = gh api "/repos/$Repository/actions/runs" | ConvertFrom-Json
 $workflowRuns = $allRuns.workflow_runs.Where({$_.path -eq $WorkflowPath -and $_.head_branch -eq $Branch})
 
 if ($workflowRuns) {
-    $conclusion = $workflowRuns[0].conclusion
+    return $workflowRuns[0].conclusion
 }
-
-return $conclusion

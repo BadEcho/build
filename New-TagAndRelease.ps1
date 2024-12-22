@@ -1,7 +1,8 @@
 # Creates a Git tag for a new release.
 
 param (
-    [string]$ProductName
+    [string]$ProductName,
+    [string]$Repository
 )
 
 $versionSettings = Get-Content version.json | ConvertFrom-Json
@@ -9,4 +10,4 @@ $releaseTag = "v{0}.{1}.{2}" -f $versionSettings.majorVersion, $versionSettings.
 git tag -a $releaseTag HEAD -m "$ProductName $releaseTag"
 git push origin $releaseTag
 
-return $releaseTag
+gh release create $releaseTag --repo="$Repository" --title="$ProductName $($releaseTag.TrimStart("v"))" --generate-notes

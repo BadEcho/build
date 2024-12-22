@@ -11,6 +11,11 @@ on:
       component-to-increment:
         required: true
         type: string
+    secrets:
+      REPO_TOKEN:
+        required: true
+      NUGET_API_KEY:
+        required: true
 
 env:
   LAST_RUN_CONCLUSION:

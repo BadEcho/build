@@ -1,4 +1,4 @@
-# Creates a Git tag for a new release.
+# Creates a Git tag for the current version and then generates a new GitHub release.
 
 param (
     [string]$ProductName,

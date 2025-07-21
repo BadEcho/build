@@ -26,7 +26,7 @@
 		<AnalysisMode>All</AnalysisMode>
 	</PropertyGroup>
 
-  <!--Versioning.-->
+	<!--Versioning.-->
 	<PropertyGroup>
 		<MajorVersion>0</MajorVersion>
 		<MinorVersion>1</MinorVersion>
@@ -56,21 +56,21 @@
 		</None>
 	</ItemGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <OutputPath>$(SolutionDir)\bin\dbg</OutputPath>
-    <DocumentationFile>$(SolutionDir)\bin\dbg\$(AssemblyName).xml</DocumentationFile>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <OutputPath>$(SolutionDir)\bin\rel</OutputPath>
-    <DocumentationFile>$(SolutionDir)\bin\rel\$(AssemblyName).xml</DocumentationFile>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)\strongNaming.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
+	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+		<OutputPath>$(SolutionDir)\bin\dbg</OutputPath>
+		<DocumentationFile>$(SolutionDir)\bin\dbg\$(AssemblyName).xml</DocumentationFile>
+	</PropertyGroup>
+	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+		<OutputPath>$(SolutionDir)\bin\rel</OutputPath>
+		<DocumentationFile>$(SolutionDir)\bin\rel\$(AssemblyName).xml</DocumentationFile>
+		<SignAssembly>true</SignAssembly>
+		<AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)\strongNaming.snk</AssemblyOriginatorKeyFile>
+	</PropertyGroup>
 
-  <!--This is needed in order to prevent inaccurate errors from being displayed during design-time.-->
-  <Target Name="DisableDesignTimeCompileCheck" AfterTargets="_CheckCompileDesignTimePrerequisite">
-	  <PropertyGroup>
-		  <BuildingProject>false</BuildingProject>
-	  </PropertyGroup>
-  </Target>
+	<!--This is needed in order to prevent inaccurate errors from being displayed during design-time.-->
+	<Target Name="DisableDesignTimeCompileCheck" AfterTargets="_CheckCompileDesignTimePrerequisite">
+		<PropertyGroup>
+			<BuildingProject>false</BuildingProject>
+		</PropertyGroup>
+	</Target>
 </Project>

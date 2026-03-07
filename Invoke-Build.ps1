@@ -52,6 +52,6 @@ if(-Not $ReleaseBuild){
 }
 
 Execute { & msbuild -p:Configuration=Release -t:Clean }
-Execute { & dotnet restore /p:DisableWarnForInvalidRestoreProjects=true }
+Execute { & dotnet restore /p:DisableWarnForInvalidRestoreProjects=true /p:Configuration=Release }
 Execute $buildCommand 
 Execute $packCommand

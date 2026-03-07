@@ -65,6 +65,7 @@
 		<DocumentationFile>$(SolutionDir)\bin\rel\$(AssemblyName).xml</DocumentationFile>
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)\strongNaming.snk</AssemblyOriginatorKeyFile>
+		<DebugType>embedded</DebugType>
 	</PropertyGroup>
 
 	<!--This is needed in order to prevent inaccurate errors from being displayed during design-time.-->

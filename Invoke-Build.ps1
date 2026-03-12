@@ -4,7 +4,9 @@ param (
 	# If set, then a stable release build, as opposed to a pre-release build, is packaged.
 	[switch]$ReleaseBuild,
 	# Used to specify the configuration build to use in place of Release to prevent attempts to package native projects.
-	[string]$PackageConfiguration
+	[string]$PackageConfiguration,
+	# Used to specify the target runtime to restore packages for.
+	[string]$Runtime
 )
 
 function Execute([scriptblock]$command) {
@@ -15,7 +17,7 @@ function Execute([scriptblock]$command) {
 	}
 }
 
-function AppendCommand([string]$command, [string]$commandSuffix){
+function AppendCommand([string]$command, [string]$commandSuffix) {
 	return [ScriptBlock]::Create($command + $commandSuffix)
 }
 
@@ -35,13 +37,19 @@ $majorVersion = $versionSettings.majorVersion
 $minorVersion = $versionSettings.minorVersion
 $patchVersion = $versionSettings.patchVersion
 
-$buildCommand =  { & msbuild -p:Configuration=Release -p:MajorVersion=$majorVersion -p:MinorVersion=$minorVersion -p:PatchVersion=$patchVersion }
+$buildCommand = { & msbuild -p:Configuration=Release -p:MajorVersion=$majorVersion -p:MinorVersion=$minorVersion -p:PatchVersion=$patchVersion }
 # If there are any native projects in the solution, then a separate configuration created specifically for use during NuGet package creation needs to be made.
 # This configuration needs to have all native projects excluded from being built so we don't attempt to pack them. Normally, we'd assign a value of false to the
 # IsPackable element for the project, however MSBuild ignores this property and errors out anyway.
 $packCommand = { & msbuild -t:Pack -p:Configuration=$PackageConfiguration -p:PackageOutputPath=$artifacts -p:NoBuild=true -p:MajorVersion=$majorVersion -p:MinorVersion=$minorVersion -p:PatchVersion=$patchVersion }
 
-if(-Not $ReleaseBuild){
+$restoreCommand = { & dotnet restore /p:DisableWarnForInvalidRestoreProjects=true /p:Configuration=Release }
+
+if ($PSBoundParameters.ContainsKey('Runtime')) {
+	$restoreCommand = AppendCommand($restoreCommand.ToString(), "--runtime $Runtime")
+}
+
+if (-Not $ReleaseBuild) {
 	$commitId = git rev-parse --short HEAD
 	$versionDistance = git rev-list --count "$(git log -1 --pretty=format:"%H" version.json)..HEAD"
 	$prereleaseId = $versionSettings[0].prereleaseId		
@@ -52,6 +60,6 @@ if(-Not $ReleaseBuild){
 }
 
 Execute { & msbuild -p:Configuration=Release -t:Clean }
-Execute { & dotnet restore /p:DisableWarnForInvalidRestoreProjects=true /p:Configuration=Release }
+Execute $restoreCommand
 Execute $buildCommand 
 Execute $packCommand

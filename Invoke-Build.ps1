@@ -14,8 +14,7 @@ function Execute([scriptblock]$command) {
 	Write-Host "Executing build command: $($commandDescription)"
 	& $command
 	if ($lastexitcode -ne 0) {			
-		Write-Host -ForegroundColor Red	"Failed: $($commandDescription)"
-		Exit $lastexitcode
+		throw("Failed: $($commandDescription)")
 	}
 }
 

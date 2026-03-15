@@ -5,8 +5,8 @@ param (
 	[switch]$ReleaseBuild,
 	# Used to specify the configuration build to use in place of Release to prevent attempts to package native projects.
 	[string]$PackageConfiguration,
-	# Used to specify the target runtime to restore packages for.
-	[string]$Runtime
+	# Used to define additional MSBuild properties to use during package restoration.
+	[string[]]$AdditionalRestoreProperties
 )
 
 function Execute([scriptblock]$command) {
@@ -45,8 +45,9 @@ $packCommand = { & msbuild -t:Pack -p:Configuration=$PackageConfiguration -p:Pac
 
 $restoreCommand = { & dotnet restore /p:DisableWarnForInvalidRestoreProjects=true /p:Configuration=Release }
 
-if ($PSBoundParameters.ContainsKey('Runtime')) {
-	$restoreCommand = AppendCommand($restoreCommand.ToString(), "--runtime $Runtime")
+if ($PSBoundParameters.ContainsKey('AdditionalRestoreProperties')) {
+	$restoreCommandProperties = Join-String -FormatString " /p:{0}" -InputObject $AdditionalRestoreProperties	
+	$restoreCommand = AppendCommand($restoreCommand.ToString(), $restoreCommandProperties)
 }
 
 if (-Not $ReleaseBuild) {

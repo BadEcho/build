@@ -1,5 +1,6 @@
 # Builds Bad Echo solutions.
 
+[CmdletBinding(PositionalBinding=$false)]
 param (
 	# If set, then a stable release build, as opposed to a pre-release build, is packaged.
 	[switch]$ReleaseBuild,
@@ -46,7 +47,7 @@ $packCommand = { & msbuild -t:Pack -p:Configuration=$PackageConfiguration -p:Pac
 
 $restoreCommand = { & dotnet restore /p:DisableWarnForInvalidRestoreProjects=true /p:Configuration=Release }
 
-if ($PSBoundParameters.ContainsKey('$AdditionalRestoreProperties')) {
+if ($PSBoundParameters.ContainsKey('AdditionalRestoreProperties')) {
 	$restoreCommandProperties = Join-String -FormatString " /p:{0}" -InputObject $AdditionalRestoreProperties	
 	$restoreCommand = AppendCommand($restoreCommand.ToString(), $restoreCommandProperties)
 }

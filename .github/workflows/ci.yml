@@ -1,0 +1,136 @@
+# Reusable workflow that builds the repository's code, executes tests, and then deploys the packages to NuGet when a push is made to the default branch.
+
+name: CI/CD
+ 
+on:
+  push:
+    branches:  
+      - "master"
+    paths-ignore:
+      - '.github/workflows/**'
+      - '!.github/workflows/ci.yml'
+      - '
+  pull_request:
+    branches:
+      - "master"
+  workflow_call:
+    inputs:
+      release-build:
+        required: true
+        type: boolean
+        default: false
+      skip-tests:
+        required: false
+        type: boolean
+        default: false
+    outputs:
+      build-artifact-name:
+        description: Build output artifact name
+        value: ${{ jobs.build.outputs.build-artifact-name }}
+    secrets:
+      REPO_TOKEN:
+        required: true
+      NUGET_API_KEY:
+        required: true
+
+env:
+  PACKAGE_CONFIGURATION: 'Release'
+  ADDITIONAL_RESTORE_PROPERTIES:
+  BUILD_ARTIFACT_NAME: 'binaries'
+  
+jobs:
+  build:
+    name: Fetch and Build Source
+    runs-on: windows-2025-vs2026
+    outputs:
+      build-artifact-name: ${{ env.BUILD_ARTIFACT_NAME }
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        submodules: true
+        fetch-depth: 0
+    - name: Get Build Submodule Hash
+      id: submodule-status
+      run: Write-Output "BUILD_SUBMODULE_SHA=$($(-split $(git submodule status build))[0])" >> $Env:GITHUB_OUTPUT
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v2    
+    - name: Build
+      run: .\Invoke-Build.ps1 -ReleaseBuild:$([System.Convert]::ToBoolean($Env:RELEASE_BUILD)) -PackageConfiguration:$Env:PACKAGE_CONFIGURATION -AdditionalRestoreProperties:@($Env:ADDITIONAL_RESTORE_PROPERTIES)
+      env:
+        RELEASE_BUILD: ${{ inputs.release-build != '' && inputs.release-build || 'false' }}
+        PACKAGE_CONFIGURATION: ${{ env.PACKAGE_CONFIGURATION }}
+        ADDITIONAL_RESTORE_PROPERTIES: ${{ env.ADDITIONAL_RESTORE_PROPERTIES }} 
+      # Store our compiled assets for subsequent jobs.
+    - name: Upload Build Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.BUILD_ARTIFACT_NAME }}
+        path: bin/rel/
+    - name: Upload Package Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: packages
+        path: artifacts/
+  test:
+    name: Run Unit Tests
+    needs: build
+    if: inputs.skip-tests != true
+    runs-on: windows-2025-vs2026
+    steps:
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+    - name: Add VSTest to PATH
+      uses: darenm/Setup-VSTest@v1.3
+    - name: Download Build Artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ env.BUILD_ARTIFACT_NAME }}
+        path: bin/rel/
+    - name: Execute Test Runner
+      run: |
+        Get-ChildItem bin\rel\*.Tests.dll | `
+        ForEach-Object {vstest.console /Logger:trx`;LogFileName="$($_.BaseName).trx" /ResultsDirectory:testResults $_.FullName; if ($LASTEXITCODE -eq 1) {$failWhenDone = $true} }; `
+        if ($failWhenDone -eq $true) { exit 1 }
+    - name: Upload Test Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results
+        path: testResults/
+    - name: Generate Report
+      if: always()
+      uses: EnricoMi/publish-unit-test-result-action/windows@v2
+      with:
+        check_name: Unit Test Results
+        files: testResults/**/*.trx
+  deploy:
+    name: Deploy Packages
+    needs: [build, test]
+    if: always() && github.event_name != 'pull_request'
+    runs-on: windows-2025-vs2026
+    steps:
+    - name: Check Previous Jobs' Results
+      if: needs.build.result != 'success' || (needs.test.result != 'success' && inputs.skip-tests != true)
+      run: exit 1
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        submodules: true
+        fetch-depth: 0        
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+    - name: Download Package Artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: packages
+        path: artifacts/
+    - name: Push to NuGet
+      run: .\Publish-Packages.ps1 ${{ secrets.NUGET_API_KEY }}

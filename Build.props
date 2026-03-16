@@ -26,30 +26,6 @@
 		<AnalysisMode>All</AnalysisMode>
 	</PropertyGroup>
 
-	<!--Versioning.-->
-	<PropertyGroup>
-		<MajorVersion>0</MajorVersion>
-		<MinorVersion>1</MinorVersion>
-		<PatchVersion>0</PatchVersion>
-		<VersionPrefix>$(MajorVersion).$(MinorVersion).$(PatchVersion)</VersionPrefix>
-		<AssemblyVersion>$(MajorVersion).0.0.0</AssemblyVersion>
-	</PropertyGroup>
-
-	<Choose>
-		<When Condition=" '$(BuildMetadata)' != '' AND '$(PrereleaseId)' != '' AND '$(BuildNumber)' != ''">
-			<PropertyGroup>
-				<VersionSuffix>$(PrereleaseId).$(BuildNumber)</VersionSuffix>
-				<InformationalVersion>$(VersionPrefix)-$(VersionSuffix)+$(BuildMetadata)</InformationalVersion>
-				<FileVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion).$(BuildNumber)</FileVersion>
-			</PropertyGroup>
-		</When>
-		<Otherwise>
-			<PropertyGroup>
-				<FileVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion).0</FileVersion>
-			</PropertyGroup>
-		</Otherwise>
-	</Choose>
-
 	<ItemGroup>
 		<None Include="$(SolutionDir)media\Icon.png" Pack="true" PackagePath="">
 			<Link>Properties\Icon.png</Link>

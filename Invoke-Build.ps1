@@ -33,16 +33,13 @@ if (Test-Path $artifacts) {
 	Remove-Item $artifacts -Force -Recurse
 }
 
-$versionSettings = Get-Content version.json | ConvertFrom-Json
-$majorVersion = $versionSettings.majorVersion
-$minorVersion = $versionSettings.minorVersion
-$patchVersion = $versionSettings.patchVersion
+$versionDistance = git rev-list --count "$(git log -1 --pretty=format:"%H" version.json)..HEAD"
 
-$buildCommand = { & msbuild -p:Configuration=Release -p:MajorVersion=$majorVersion -p:MinorVersion=$minorVersion -p:PatchVersion=$patchVersion }
+$buildCommand = { & msbuild -p:Configuration=Release -p:BuildNumber=$versionDistance }
 # If there are any native projects in the solution, then a separate configuration created specifically for use during NuGet package creation needs to be made.
 # This configuration needs to have all native projects excluded from being built so we don't attempt to pack them. Normally, we'd assign a value of false to the
 # IsPackable element for the project, however MSBuild ignores this property and errors out anyway.
-$packCommand = { & msbuild -t:Pack -p:Configuration=$PackageConfiguration -p:PackageOutputPath=$artifacts -p:NoBuild=true -p:MajorVersion=$majorVersion -p:MinorVersion=$minorVersion -p:PatchVersion=$patchVersion }
+$packCommand = { & msbuild -t:Pack -p:Configuration=$PackageConfiguration -p:PackageOutputPath=$artifacts -p:BuildNumber=$versionDistance }
 
 $restoreCommand = { & dotnet restore /p:DisableWarnForInvalidRestoreProjects=true /p:Configuration=Release }
 
@@ -51,9 +48,7 @@ $restoreCommand = AppendCommand($restoreCommand.ToString(), $restoreCommandPrope
 
 if (-Not $ReleaseBuild) {
 	$commitId = git rev-parse --short HEAD
-	$versionDistance = git rev-list --count "$(git log -1 --pretty=format:"%H" version.json)..HEAD"
-	$prereleaseId = $versionSettings[0].prereleaseId		
-	$versionCommand = "-p:BuildMetadata=$commitId -p:PrereleaseId=$prereleaseId -p:BuildNumber=$versionDistance"
+	$versionCommand = "-p:BuildMetadata=$commitId"
 
 	$buildCommand = AppendCommand($buildCommand.ToString(), $versionCommand)
 	$packCommand = AppendCommand($packCommand.ToString(), $versionCommand)

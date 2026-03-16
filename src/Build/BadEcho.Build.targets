@@ -1,0 +1,24 @@
+<Project>
+
+	<!--Loads the version file local to the project being built, and then populates all versioning-related properties.-->
+	<Target Name="ReadVersion" BeforeTargets="BeforeBuild">
+		<ReadJsonFile Path="$(VersionPath)">
+			<Output TaskParameter="Output" ItemName="Version"/>
+		</ReadJsonFile>
+
+		<PropertyGroup>
+			<MajorVersion>%(Version.MajorVersion)</MajorVersion>
+			<MinorVersion>%(Version.MinorVersion)</MinorVersion>
+			<PatchVersion>%(Version.MajorVersion)</PatchVersion>
+			<PrereleaseId>%(Version.PrereleaseId)</PrereleaseId>
+			<VersionPrefix>$(MajorVersion).$(MinorVersion).$(PatchVersion)</VersionPrefix>
+			<AssemblyVersion>$(MajorVersion).0.0.0</AssemblyVersion>
+			<Version>$(MajorVersion).$(MinorVersion).$(PatchVersion)</Version>
+			<VersionSuffix Condition=" '$(BuildMetadata)' != '' ">-$(PrereleaseId).$(BuildNumber)</VersionSuffix>
+			<PackageVersion>$(VersionPrefix)$(VersionSuffix)</PackageVersion>
+			<InformationalVersion Condition=" '$(BuildMetadata)' != '' ">$(VersionPrefix)$(VersionSuffix)+$(BuildMetadata)</InformationalVersion>
+			<FileVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion).$(BuildNumber)</FileVersion>
+		</PropertyGroup>
+	</Target>
+
+</Project>

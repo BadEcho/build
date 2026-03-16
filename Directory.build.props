@@ -1,0 +1,11 @@
+<Project>
+	<PropertyGroup>
+		<RootProperties>$([MSBuild]::GetPathOfFileAbove('Root.build.props', '$(MSBuildThisFileDirectory)..\'))</RootProperties>
+		<BuildProperties Condition="Exists($(RootProperties))">$(RootProperties)</BuildProperties>
+		<BuildProperties Condition="'$(BuildProperties)' == ''">Build.props</BuildProperties>
+	</PropertyGroup>
+	<Import Project="$(BuildProperties)"/>
+	<PropertyGroup>
+		<RepositoryUrl>https://github.com/BadEcho/build</RepositoryUrl>
+	</PropertyGroup>
+</Project>

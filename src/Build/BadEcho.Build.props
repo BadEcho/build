@@ -1,0 +1,17 @@
+<Project>
+
+	<PropertyGroup>
+		<TaskAssemblyPath>$(MSBuildThisFileDirectory)..\tasks\net10.0\$(MSBuildThisFileName).dll</TaskAssemblyPath>
+	</PropertyGroup>
+
+	<UsingTask TaskName="ReadJsonFile" AssemblyFile="$(TaskAssemblyPath)" Runtime="NET" Architecture="*" />
+
+	<PropertyGroup>
+		<VersionPath Condition="'$(VersionPath)' == ''">..\..\version.json</VersionPath>
+		<MajorVersion Condition="'$(MajorVersion)' == ''">0</MajorVersion>
+		<MinorVersion Condition="'$(MinorVersion)' == ''">1</MinorVersion>
+		<PatchVersion Condition="'$(PatchVersion)' == ''">0</PatchVersion>
+		<AssemblyVersion>$(MajorVersion).0.0.0</AssemblyVersion>
+	</PropertyGroup>
+
+</Project>

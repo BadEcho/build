@@ -49,9 +49,6 @@ jobs:
       with:
         submodules: true
         fetch-depth: 0
-    - name: Get Build Submodule Hash
-      id: submodule-status
-      run: Write-Output "BUILD_SUBMODULE_SHA=$($(-split $(git submodule status build))[0])" >> $Env:GITHUB_OUTPUT
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:

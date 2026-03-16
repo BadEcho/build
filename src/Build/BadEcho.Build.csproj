@@ -7,6 +7,12 @@
 		<Description>Adds custom MSBuild tasks used by Bad Echo projects.</Description>
 		<IsPackable>true</IsPackable>
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+		<MajorVersion>0</MajorVersion>
+		<MinorVersion>1</MinorVersion>
+		<PatchVersion>0</PatchVersion>
+		<VersionPrefix>$(MajorVersion).$(MinorVersion).$(PatchVersion)</VersionPrefix>
+		<AssemblyVersion>$(MajorVersion).0.0.0</AssemblyVersion>
+		<FileVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion).0</FileVersion>
 	</PropertyGroup>
 
 	<!--Places our property/target files into 'build' for automatic inclusion in the buililld process.-->

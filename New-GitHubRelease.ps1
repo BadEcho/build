@@ -2,7 +2,8 @@
 
 param (
     [string]$ProductName,
-    [string]$Repository
+    [string]$Repository,
+    [string]$Asset
 )
 
 # Create a tag for the release version.
@@ -12,5 +13,4 @@ git tag -a $releaseTag HEAD -m "$ProductName $releaseTag"
 git push origin $releaseTag
 
 # Create a new GitHub Release.
-Compress-Archive -Path bin\rel\* -DestinationPath Binaries.zip
-gh release create $releaseTag --repo="$Repository" --title="$ProductName $($releaseTag.TrimStart("v"))" --generate-notes "Binaries.zip #Binaries (zip)"
+gh release create $releaseTag --repo="$Repository" --title="$ProductName $($releaseTag.TrimStart("v"))" --generate-notes $Asset

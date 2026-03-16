@@ -6,6 +6,7 @@
 		<Product>$(Title)</Product>
 		<Description>Adds custom MSBuild tasks used by Bad Echo projects.</Description>
 		<IsPackable>true</IsPackable>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 		<MajorVersion>0</MajorVersion>
 		<MinorVersion>1</MinorVersion>

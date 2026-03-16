@@ -32,6 +32,10 @@
 		</None>
 	</ItemGroup>
 
+	<ItemGroup Condition="!$(MSBuildProjectFullPath.StartsWith($(MSBuildThisFileDirectory)))">
+		<PackageReference Include="BadEcho.Build" Version="0.1.0" />
+	</ItemGroup>
+
 	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
 		<OutputPath>$(SolutionDir)\bin\dbg</OutputPath>
 		<DocumentationFile>$(SolutionDir)\bin\dbg\$(AssemblyName).xml</DocumentationFile>

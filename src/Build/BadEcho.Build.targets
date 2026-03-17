@@ -9,7 +9,7 @@
 		<PropertyGroup>
 			<MajorVersion>%(Version.MajorVersion)</MajorVersion>
 			<MinorVersion>%(Version.MinorVersion)</MinorVersion>
-			<PatchVersion>%(Version.MajorVersion)</PatchVersion>
+			<PatchVersion>%(Version.PatchVersion)</PatchVersion>
 			<PrereleaseId>%(Version.PrereleaseId)</PrereleaseId>
 			<VersionPrefix>$(MajorVersion).$(MinorVersion).$(PatchVersion)</VersionPrefix>
 			<AssemblyVersion>$(MajorVersion).0.0.0</AssemblyVersion>

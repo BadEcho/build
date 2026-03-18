@@ -6,7 +6,9 @@ param (
 	# Used to specify the configuration build to use in place of Release to prevent attempts to package native projects.
 	[string]$PackageConfiguration,
 	# Used to define additional MSBuild properties to use during package restoration.
-	[string[]]$AdditionalRestoreProperties
+	[string[]]$AdditionalRestoreProperties,
+	# If set, MSBuild will be used to run the Restore target instead of dotnet.
+	[switch]$UseMSBuildRestore
 )
 
 function Execute([scriptblock]$command) {
@@ -41,7 +43,14 @@ $buildCommand = { & msbuild -p:Configuration=Release -p:BuildNumber=$versionDist
 # IsPackable element for the project, however MSBuild ignores this property and errors out anyway.
 $packCommand = { & msbuild -t:Pack -p:Configuration=$PackageConfiguration -p:PackageOutputPath=$artifacts -p:BuildNumber=$versionDistance }
 
-$restoreCommand = { & dotnet restore /p:DisableWarnForInvalidRestoreProjects=true /p:Configuration=Release }
+if ($UseMSBuildRestore) {
+	$restoreCommand = { & msbuild -t:Restore }
+}
+else {
+	$restoreCommand = { & dotnet restore }
+}
+
+$restoreCommand = AppendCommand($restoreCommand.ToString(), "/p:DisableWarnForInvalidRestoreProjects=true /p:Configuration=Release")
 
 if ($AdditionalRestoreProperties) {
 	$restoreCommandProperties = Join-String -FormatString " /p:{0}" -InputObject $AdditionalRestoreProperties	

@@ -43,8 +43,10 @@ $packCommand = { & msbuild -t:Pack -p:Configuration=$PackageConfiguration -p:Pac
 
 $restoreCommand = { & dotnet restore /p:DisableWarnForInvalidRestoreProjects=true /p:Configuration=Release }
 
-$restoreCommandProperties = Join-String -FormatString " /p:{0}" -InputObject $AdditionalRestoreProperties	
-$restoreCommand = AppendCommand($restoreCommand.ToString(), $restoreCommandProperties)
+if ($AdditionalRestoreProperties) {
+	$restoreCommandProperties = Join-String -FormatString " /p:{0}" -InputObject $AdditionalRestoreProperties	
+	$restoreCommand = AppendCommand($restoreCommand.ToString(), $restoreCommandProperties)
+}
 
 if (-Not $ReleaseBuild) {
 	$commitId = git rev-parse --short HEAD

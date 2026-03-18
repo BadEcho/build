@@ -11,6 +11,7 @@
 		<MajorVersion Condition="'$(MajorVersion)' == ''">0</MajorVersion>
 		<MinorVersion Condition="'$(MinorVersion)' == ''">1</MinorVersion>
 		<PatchVersion Condition="'$(PatchVersion)' == ''">0</PatchVersion>
+		<BuildNumber Condition="'$(BuildNumber)' == ''">0</BuildNumber>
 		<AssemblyVersion>$(MajorVersion).0.0.0</AssemblyVersion>
 	</PropertyGroup>
 

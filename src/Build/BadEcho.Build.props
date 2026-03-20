@@ -4,10 +4,13 @@
 		<TaskAssemblyPath>$(MSBuildThisFileDirectory)..\tasks\net10.0\$(MSBuildThisFileName).dll</TaskAssemblyPath>
 	</PropertyGroup>
 
-	<UsingTask TaskName="ReadJsonFile" AssemblyFile="$(TaskAssemblyPath)" Runtime="NET" Architecture="*" />
+	<UsingTask TaskName="BadEcho.Build.ReadJsonFile" AssemblyFile="$(TaskAssemblyPath)" Runtime="NET" Architecture="*" />
+	<UsingTask TaskName="BadEcho.Build.Git" AssemblyFile="$(TaskAssemblyPath)" Runtime="NET" Architecture="*" />
 
 	<PropertyGroup>
-		<VersionPath Condition="'$(VersionPath)' == ''">..\..\version.json</VersionPath>
+		<ReleaseBuild Condition="'$(ReleaseBuild)' == ''">false</ReleaseBuild>
+		<VersionJsonPath Condition="'$(VersionJsonPath)' == ''">..\..\version.json</VersionJsonPath>
+		<VersionPropertiesPath Condition="'$(VersionPropertiesPath)' == ''">..\..\Version.props</VersionPropertiesPath>
 		<MajorVersion Condition="'$(MajorVersion)' == ''">0</MajorVersion>
 		<MinorVersion Condition="'$(MinorVersion)' == ''">1</MinorVersion>
 		<PatchVersion Condition="'$(PatchVersion)' == ''">0</PatchVersion>

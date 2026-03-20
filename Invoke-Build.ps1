@@ -35,13 +35,11 @@ if (Test-Path $artifacts) {
 	Remove-Item $artifacts -Force -Recurse
 }
 
-$versionDistance = git rev-list --count "$(git log -1 --pretty=format:"%H" version.json)..HEAD"
-
-$buildCommand = { & msbuild -p:Configuration=Release -p:BuildNumber=$versionDistance }
+$buildCommand = { & msbuild -p:Configuration=Release -p:ReleaseBuild=$ReleaseBuild }
 # If there are any native projects in the solution, then a separate configuration created specifically for use during NuGet package creation needs to be made.
 # This configuration needs to have all native projects excluded from being built so we don't attempt to pack them. Normally, we'd assign a value of false to the
 # IsPackable element for the project, however MSBuild ignores this property and errors out anyway.
-$packCommand = { & msbuild -t:Pack -p:Configuration=$PackageConfiguration -p:PackageOutputPath=$artifacts -p:BuildNumber=$versionDistance }
+$packCommand = { & msbuild -t:Pack -p:Configuration=$PackageConfiguration -p:PackageOutputPath=$artifacts -p:ReleaseBuild=$ReleaseBuild  }
 
 if ($UseMSBuildRestore) {
 	$restoreCommand = { & msbuild -t:Restore }
@@ -57,15 +55,9 @@ if ($AdditionalRestoreProperties) {
 	$restoreCommand = AppendCommand($restoreCommand.ToString(), $restoreCommandProperties)
 }
 
-if (-Not $ReleaseBuild) {
-	$commitId = git rev-parse --short HEAD
-	$versionCommand = "-p:BuildMetadata=$commitId"
-
-	$buildCommand = AppendCommand($buildCommand.ToString(), $versionCommand)
-	$packCommand = AppendCommand($packCommand.ToString(), $versionCommand)
-}
-
 Execute { & msbuild -p:Configuration=Release -t:Clean }
 Execute $restoreCommand
 Execute $buildCommand 
 Execute $packCommand
+
+Get-ChildItem Version.props -Recurse | Remove-Item

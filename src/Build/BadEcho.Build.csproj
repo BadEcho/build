@@ -10,10 +10,12 @@
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 		<MajorVersion>0</MajorVersion>
 		<MinorVersion>1</MinorVersion>
-		<PatchVersion>2</PatchVersion>
+		<PatchVersion>3</PatchVersion>
 		<VersionPrefix>$(MajorVersion).$(MinorVersion).$(PatchVersion)</VersionPrefix>
 		<AssemblyVersion>$(MajorVersion).0.0.0</AssemblyVersion>
 		<FileVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion).0</FileVersion>
+		<!--This is an MSBuild Task package, not a library, which means our assets (including the dependency list we'll be generating) will be in 'tasks' instead of 'lib'.-->
+		<BuildOutputTargetFolder>tasks</BuildOutputTargetFolder>
 	</PropertyGroup>
 
 	<!--Places our property/target files into 'build' for automatic inclusion in the buililld process.-->
@@ -22,10 +24,17 @@
 		<Content Include="BadEcho.Build.targets" PackagePath="build\" />
 	</ItemGroup>
 
-	<!--MSBuild Task packages need to have their dependencies bundled with them. This requires several steps.-->
+	<!--
+	MSBuild Task packages need to have their dependencies bundled with them, as opposed to the having those dependencies exposed to consuming projects.
+	This requires marking all dependencies below as private, followed by the generation of a dependency list.
+	-->
 	<ItemGroup>
-		<!--First, we mark the dependencies as private so NuGet doesn't expose them to consuming projects.-->
-		<PackageReference Include="Microsoft.Build.Utilities.Core" Version="18.4.0" PrivateAssets="all" ExcludeAssetsw="Runtime" />
+		<!--The only dependency we don't want bundled with the package is the Microsoft.Build.Utilities.Core assembly, as MSBuild provides this dependency at runtime.-->
+		<PackageReference Include="Microsoft.Build.Utilities.Core" Version="18.4.0" PrivateAssets="all" ExcludeAssets="Runtime" />
+		<!--
+		Note that this package does not, at the time of writing, have any other dependencies we need to bundle with it; however, if we ever need to add one or more dependencies
+		in the future, at least they'll be properly handled.
+		-->
 	</ItemGroup>
 	<ItemGroup>
 		<Compile Update="Properties\Strings.Designer.cs">
@@ -36,12 +45,12 @@
 	</ItemGroup>
 
 	<PropertyGroup>
-		<!--Next, we hook into the target that collects the files to be packaged-->
+		<!--Next, we hook into the target that collects the files to be packaged.-->
 		<TargetsForTfmSpecificBuildOutput>
 			$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage
 		</TargetsForTfmSpecificBuildOutput>
-		<!--This is an MSBuild Task package, not a library, which means our assets (including the dependency list we'll be generating) will be in 'tasks' instead of 'lib'.-->
-		<BuildOutputTargetFolder>tasks</BuildOutputTargetFolder>
+		<!--All dependencies need to be copied into the output folder for bundling.-->
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 		<!--NuGet normally warns about libraries in a package not exposed as dependencies. We do not want this behavior for this package.-->
 		<NoWarn>NU5100,NU5128</NoWarn>
 	</PropertyGroup>

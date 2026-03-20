@@ -24,6 +24,8 @@
 		<ImplicitUsings>true</ImplicitUsings>
 		<DefineConstants>$(DefineConstants);CODE_ANALYSIS</DefineConstants>
 		<AnalysisMode>All</AnalysisMode>
+		<!--Our custom build task provides the source revision information, which will be the short hash for the commit. The full hash appended by the runtime is too much for my tastes.-->
+		<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
 	</PropertyGroup>
 
 	<ItemGroup>

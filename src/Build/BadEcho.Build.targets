@@ -1,24 +1,77 @@
 <Project>
 
-	<!--Loads the version file local to the project being built, and then populates all versioning-related properties.-->
-	<Target Name="ReadVersion" BeforeTargets="BeforeBuild">
-		<ReadJsonFile Path="$(VersionPath)">
+	<!--
+	This loads the version file local to the project being built and then populates all versioning-related properties.
+	The approach taken by this task allows us to use versioning information specific to the repository where each project
+	lives, allowing us to isolate submodule dependencies from the versioning information defined at the root project level.
+	-->
+	<Target Condition="!Exists($(VersionPropertiesPath))" Name="CreateVersionProperties" BeforeTargets="BeforeBuild">
+		<ReadJsonFile Path="$(VersionJsonPath)">
 			<Output TaskParameter="Output" ItemName="Version"/>
 		</ReadJsonFile>
 
+		<!--We retrieve the hash for the last commit where our version file was changed.-->
+		<Git Command="log" Arguments="-1 --pretty=format:&quot;%H&quot; $(VersionJsonPath)">
+			<Output TaskParameter="Output" PropertyName="LastVersionChangeHash"/>
+		</Git>
+
+		<!--We then calculate our version distance, which is used as the build number for our version.-->
+		<Git Command="rev-list" Arguments="--count &quot;$(LastVersionChangeHash)..HEAD">
+			<Output TaskParameter="Output" PropertyName="BuildNumber"/>
+		</Git>
+
+		<!--
+		Finally, we grab the short hash for the current commit, which we tack on to the assembly's product version (as opposed to the long hash appended by the runtime, which is a bit unnecessary).
+		-->
+		<Git Command="rev-parse" Arguments="--short HEAD">
+			<Output TaskParameter="Output" PropertyName="CommitId"/>
+		</Git>
+
 		<PropertyGroup>
+			<!--			
+			These properties will be saved to disk to be loaded as a project file by all subsequent projects that share this versioning information.
+			We can't load a project file within a target, so we load these property values into the current project executing this target before persisting them to disk.
+			-->
 			<MajorVersion>%(Version.MajorVersion)</MajorVersion>
 			<MinorVersion>%(Version.MinorVersion)</MinorVersion>
 			<PatchVersion>%(Version.PatchVersion)</PatchVersion>
 			<PrereleaseId>%(Version.PrereleaseId)</PrereleaseId>
 			<VersionPrefix>$(MajorVersion).$(MinorVersion).$(PatchVersion)</VersionPrefix>
 			<AssemblyVersion>$(MajorVersion).0.0.0</AssemblyVersion>
-			<Version>$(MajorVersion).$(MinorVersion).$(PatchVersion)</Version>
-			<VersionSuffix Condition=" '$(BuildMetadata)' != '' ">-$(PrereleaseId).$(BuildNumber)</VersionSuffix>
-			<PackageVersion>$(VersionPrefix)$(VersionSuffix)</PackageVersion>
-			<InformationalVersion Condition=" '$(BuildMetadata)' != '' ">$(VersionPrefix)$(VersionSuffix)+$(BuildMetadata)</InformationalVersion>
+			<VersionSuffix Condition="!$(ReleaseBuild)">$(PrereleaseId).$(BuildNumber)</VersionSuffix>
+			<InformationalVersion Condition="!$(ReleaseBuild)">$(VersionPrefix)-$(VersionSuffix)+$(CommitId)</InformationalVersion>
+			<InformationalVersion Condition="$(ReleaseBuild)">$(VersionPrefix)+$(CommitId)</InformationalVersion>
 			<FileVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion).$(BuildNumber)</FileVersion>
-		</PropertyGroup>
-	</Target>
 
+			<VersionProperties>
+				<PropertyGroup>
+					<MajorVersion>$(MajorVersion)</MajorVersion>
+					<MinorVersion>$(MinorVersion)</MinorVersion>
+					<PatchVersion>$(PatchVersion)</PatchVersion>
+					<PrereleaseId>$(PrereleaseId)</PrereleaseId>
+					<InformationalVersion>$(InformationalVersion)</InformationalVersion>
+					<AssemblyVersion>$(AssemblyVersion)</AssemblyVersion>
+					<VersionPrefix>$(VersionPrefix)</VersionPrefix>
+					<VersionSuffix>$(VersionSuffix)</VersionSuffix>
+					<FileVersion>$(FileVersion)</FileVersion>
+					<BuildNumber>$(BuildNumber)</BuildNumber>
+				</PropertyGroup>
+			</VersionProperties>
+		</PropertyGroup>
+
+		<!--
+		The above XML property is then inserted into an empty Project element and saved.
+		
+		It may seem unnecessary to generate a temporary .props file to be loaded during the build process, but it's absolutely required 
+		to support a very important feature: proper dependency versioning during NuGet package generation.
+
+		During .nuspec file generation, the versions of ProjectReference dependencies are determined by loading the .csproj files of said references.
+		Each dependency's version is then determined by piecing together the values of the usual version-related properties following the import.
+		It is important to note that although these project files are being loaded, they are not being built, therefore no custom targets can be run at this point in time. 
+		
+		This means that if the necessary properties aren't explicitly defined in the .csproj file, default values will be used instead during dependency
+		-->
+		<WriteLinesToFile File="$(VersionPropertiesPath)" Overwrite="true" Lines="&lt;Project/&gt;"/>
+		<XmlPoke XmlInputPath="$(VersionPropertiesPath)" Value="$(VersionProperties)" Query="/Project"/>
+	</Target>
 </Project>

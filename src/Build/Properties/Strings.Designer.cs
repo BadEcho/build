@@ -61,7 +61,7 @@ namespace BadEcho.Build.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to parse the specified JSON file..
+        ///   Looks up a localized string similar to Failed to parse the JSON file: &apos;{0}&apos;..
         /// </summary>
         internal static string JsonParseFailed {
             get {

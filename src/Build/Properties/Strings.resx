@@ -102,6 +102,6 @@
     <value>JSON file path was not provided.</value>
   </data>
 	<data name="JsonParseFailed" xml:space="preserve">
-    <value>Failed to parse the specified JSON file.</value>
+    <value>Failed to parse the JSON file: '{0}'.</value>
   </data>
 </root>

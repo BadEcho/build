@@ -28,7 +28,7 @@ public sealed class ReadJsonFile : Task
     /// Gets or sets the path to the JSON file to parse.
     /// </summary>
     [Required]
-    public string? Path 
+    public string? Path
     { get; set; }
 
     /// <summary>
@@ -43,7 +43,7 @@ public sealed class ReadJsonFile : Task
     {
         if (string.IsNullOrEmpty(Path))
         {
-            Log.LogError(Strings.NoPathProvided);
+            Log.LogErrorFromResources(nameof(Strings.NoPathProvided));
             return false;
         }
 
@@ -51,7 +51,7 @@ public sealed class ReadJsonFile : Task
 
         if (content == null)
         {
-            Log.LogError(Strings.JsonParseFailed);
+            Log.LogErrorFromResources(nameof(Strings.JsonParseFailed), Path);
             return false;
         }
 
@@ -64,7 +64,7 @@ public sealed class ReadJsonFile : Task
         {
             taskItem.SetMetadata(property, contentObject[property]?.GetValue<object>().ToString());
         }
-        
+
         Output = taskItem;
         return true;
     }

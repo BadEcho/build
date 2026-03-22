@@ -11,6 +11,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using BadEcho.Build.Properties;
 using Microsoft.Build.Framework;
@@ -28,14 +29,14 @@ public sealed class ReadJsonFile : Task
     /// Gets or sets the path to the JSON file to parse.
     /// </summary>
     [Required]
-    public string? Path
+    public string? Path 
     { get; set; }
 
     /// <summary>
     /// Gets the resulting task item whose metadata has been loaded with the JSON file's properties.
     /// </summary>
     [Output]
-    public ITaskItem? Output
+    public ITaskItem? Output 
     { get; private set; }
 
     /// <inheritdoc/>
@@ -56,16 +57,32 @@ public sealed class ReadJsonFile : Task
         }
 
         JsonObject contentObject = content.AsObject();
-        IEnumerable<string> properties = contentObject.Select(kv => kv.Key);
 
         var taskItem = new TaskItem(contentObject.ToJsonString());
 
-        foreach (string property in properties)
-        {
-            taskItem.SetMetadata(property, contentObject[property]?.GetValue<object>().ToString());
-        }
+        AddPropertiesToItem(contentObject, taskItem);
 
         Output = taskItem;
         return true;
+    }
+
+    private static void AddPropertiesToItem(JsonObject jsonObject, TaskItem taskItem, string rootName = "")
+    {
+        IEnumerable<string> propertyNames = jsonObject.Select(kv => kv.Key);
+
+        foreach (string propertyName in propertyNames)
+        {
+            JsonNode? property = jsonObject[propertyName];
+
+            if (property?.GetValueKind() == JsonValueKind.Object)
+            {
+                JsonObject propertyObject = property.AsObject();
+                AddPropertiesToItem(propertyObject, taskItem, $"{rootName}{propertyName}");
+            }
+            else
+            {
+                taskItem.SetMetadata($"{rootName}{propertyName}", property?.GetValue<object>().ToString());
+            }
+        }
     }
 }

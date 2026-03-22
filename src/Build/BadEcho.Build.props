@@ -9,8 +9,11 @@
 
 	<PropertyGroup>
 		<ReleaseBuild Condition="'$(ReleaseBuild)' == ''">false</ReleaseBuild>
-		<VersionJsonPath Condition="'$(VersionJsonPath)' == ''">..\..\version.json</VersionJsonPath>
-		<VersionPropertiesPath Condition="'$(VersionPropertiesPath)' == ''">..\..\Version.props</VersionPropertiesPath>
+		<DependencyReleaseBuild Condition="'$(DependencyReleaseBuild)' == ''">false</DependencyReleaseBuild>
+		<RootPath Condition="'$(RootPath)' == ''">..\..</RootPath>
+		<VersionJsonName Condition="'$(VersionJsonName)' == ''">version.json</VersionJsonName>
+		<VersionJsonPath Condition="'$(VersionJsonPath)' == ''">$(RootPath)\$(VersionJsonName)</VersionJsonPath>
+		<VersionPropertiesPath Condition="'$(VersionPropertiesPath)' == ''">$(RootPath)\Version.props</VersionPropertiesPath>
 		<MajorVersion Condition="'$(MajorVersion)' == ''">0</MajorVersion>
 		<MinorVersion Condition="'$(MinorVersion)' == ''">1</MinorVersion>
 		<PatchVersion Condition="'$(PatchVersion)' == ''">0</PatchVersion>

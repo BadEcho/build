@@ -6,6 +6,10 @@ param (
 
 $versionSettings = Get-Content version.json | ConvertFrom-Json
 
+$versionSettings.latestRelease.majorVersion = $versionSettings.majorVersion
+$versionSettings.latestRelease.minorVersion = $versionSettings.minorVersion
+$versionSettings.latestRelease.patchVersion = $versionSettings.patchVersion
+
 switch ($ComponentToBump) {
     Major {
         $versionSettings.majorVersion++

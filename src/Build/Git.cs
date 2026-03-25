@@ -15,76 +15,77 @@ using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
-namespace BadEcho.Build;
-
-/// <summary>
-/// Provides a task that will execute a Git command.
-/// </summary>
-public sealed class Git : ToolTask
+namespace BadEcho.Build
 {
-    private readonly StringBuilder _standardOutput = new();
-
     /// <summary>
-    /// Gets or sets the Git command to execute.
+    /// Provides a task that will execute a Git command.
     /// </summary>
-    [Required]
-    public string? Command
-    { get; set; }
-
-    /// <summary>
-    /// Gets or sets arguments to pass to the Git command.
-    /// </summary>
-    public string? Arguments
-    { get; set; }
-
-    /// <summary>
-    /// Gets the standard output of the Git command.
-    /// </summary>
-    [Output]
-    public string? Output
-    { get; private set; }
-
-    /// <inheritdoc/>
-    protected override string ToolName
-        => "git.exe";
-
-    /// <inheritdoc/>
-    public override bool Execute()
+    public sealed class Git : ToolTask
     {
-        _ = ExecuteTool(GenerateFullPathToTool(), string.Empty, GenerateCommandLineCommands());
+        private readonly StringBuilder _standardOutput = new StringBuilder();
 
-        if (!Log.HasLoggedErrors)
+        /// <summary>
+        /// Gets or sets the Git command to execute.
+        /// </summary>
+        [Required]
+        public string? Command
+        { get; set; }
+
+        /// <summary>
+        /// Gets or sets arguments to pass to the Git command.
+        /// </summary>
+        public string? Arguments
+        { get; set; }
+
+        /// <summary>
+        /// Gets the standard output of the Git command.
+        /// </summary>
+        [Output]
+        public string? Output
+        { get; private set; }
+
+        /// <inheritdoc/>
+        protected override string ToolName
+            => "git.exe";
+
+        /// <inheritdoc/>
+        public override bool Execute()
         {
-            Output = _standardOutput.ToString().Trim();
-        }
+            _ = ExecuteTool(GenerateFullPathToTool(), string.Empty, GenerateCommandLineCommands());
+
+            if (!Log.HasLoggedErrors)
+            {
+                Output = _standardOutput.ToString().Trim();
+            }
         
-        return !Log.HasLoggedErrors;
-    }
+            return !Log.HasLoggedErrors;
+        }
 
-    /// <inheritdoc/>
-    protected override string GenerateFullPathToTool()
-        // The runtime will automatically search the system path for us.
-        => ToolName;
+        /// <inheritdoc/>
+        protected override string GenerateFullPathToTool()
+            // The runtime will automatically search the system path for us.
+            => ToolName;
 
-    /// <inheritdoc/>
-    protected override string GenerateCommandLineCommands()
-    {
-        var commandLine = new CommandLineBuilder();
+        /// <inheritdoc/>
+        protected override string GenerateCommandLineCommands()
+        {
+            var commandLine = new CommandLineBuilder();
 
-        commandLine.AppendTextUnquoted(Command);
+            commandLine.AppendTextUnquoted(Command);
 
-        if (!string.IsNullOrEmpty(Arguments))
-            commandLine.AppendSwitch(Arguments);
+            if (!string.IsNullOrEmpty(Arguments))
+                commandLine.AppendSwitch(Arguments);
 
-        return commandLine.ToString();
-    }
+            return commandLine.ToString();
+        }
 
-    /// <inheritdoc/>
-    protected override void LogEventsFromTextOutput(string singleLine, MessageImportance messageImportance)
-    {
-        if (!string.IsNullOrEmpty(singleLine))
-            _ = _standardOutput.AppendLine(singleLine);
+        /// <inheritdoc/>
+        protected override void LogEventsFromTextOutput(string singleLine, MessageImportance messageImportance)
+        {
+            if (!string.IsNullOrEmpty(singleLine))
+                _ = _standardOutput.AppendLine(singleLine);
 
-        base.LogEventsFromTextOutput(singleLine, messageImportance);
+            base.LogEventsFromTextOutput(singleLine, messageImportance);
+        }
     }
 }

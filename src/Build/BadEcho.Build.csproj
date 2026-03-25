@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
+		<TargetFramework>netstandard2.1</TargetFramework>
 		<Title>Bad Echo MSBuild Extensions</Title>
 		<AssemblyTitle>$(Title)</AssemblyTitle>
 		<Product>$(Title)</Product>
@@ -16,6 +17,7 @@
 		<FileVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion).0</FileVersion>
 		<!--This is an MSBuild Task package, not a library, which means our assets (including the dependency list we'll be generating) will be in 'tasks' instead of 'lib'.-->
 		<BuildOutputTargetFolder>tasks</BuildOutputTargetFolder>
+		<ImplicitUsings>false</ImplicitUsings>
 	</PropertyGroup>
 
 	<!--Places our property/target files into 'build' for automatic inclusion in the buililld process.-->
@@ -31,6 +33,7 @@
 	<ItemGroup>
 		<!--The only dependency we don't want bundled with the package is the Microsoft.Build.Utilities.Core assembly, as MSBuild provides this dependency at runtime.-->
 		<PackageReference Include="Microsoft.Build.Utilities.Core" Version="18.4.0" PrivateAssets="all" ExcludeAssets="Runtime" />
+		<PackageReference Include="System.Text.Json" Version="10.0.5" />
 		<!--
 		Note that this package does not, at the time of writing, have any other dependencies we need to bundle with it; however, if we ever need to add one or more dependencies
 		in the future, at least they'll be properly handled.

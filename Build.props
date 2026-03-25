@@ -35,7 +35,7 @@
 	</ItemGroup>
 
 	<ItemGroup Condition="!$(MSBuildProjectFullPath.StartsWith($(MSBuildThisFileDirectory))) And $(MSBuildProjectExtension) != '.wixproj'">
-		<PackageReference Include="BadEcho.Build" Version="0.1.7" PrivateAssets="all" />
+		<PackageReference Include="BadEcho.Build" Version="0.1.8" PrivateAssets="all" />
 	</ItemGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">

@@ -32,14 +32,13 @@
 			These properties will be saved to disk to be loaded as a project file by all subsequent projects that share this versioning information.
 			We can't load a project file within a target, so we load these property values into the current project executing this target before persisting them to disk.
 			-->
-			<ReleaseBuild Condition="!$(ReleaseBuild) and $(DependencyReleaseBuild)">true</ReleaseBuild>
-
 			<MajorVersion>%(Version.MajorVersion)</MajorVersion>
 			<MinorVersion>%(Version.MinorVersion)</MinorVersion>
 			<PatchVersion>%(Version.PatchVersion)</PatchVersion>
 			<PrereleaseId>%(Version.PrereleaseId)</PrereleaseId>
 
 			<DependencyReleaseBuild Condition="Exists($([MSBuild]::GetPathOfFileAbove($(VersionJsonName), $(RootPath)\..))) and $(BuildNumber) == 0 and $(PrereleaseId) == 'alpha'">true</DependencyReleaseBuild>
+			<ReleaseBuild Condition="!$(ReleaseBuild) and $(DependencyReleaseBuild)">true</ReleaseBuild>
 
 			<MajorVersion Condition="$(DependencyReleaseBuild)">%(Version.LatestReleaseMajorVersion)</MajorVersion>
 			<MinorVersion Condition="$(DependencyReleaseBuild)">%(Version.LatestReleaseMinorVersion)</MinorVersion>

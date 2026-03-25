@@ -10,7 +10,7 @@
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 		<MajorVersion>0</MajorVersion>
 		<MinorVersion>1</MinorVersion>
-		<PatchVersion>6</PatchVersion>
+		<PatchVersion>7</PatchVersion>
 		<VersionPrefix>$(MajorVersion).$(MinorVersion).$(PatchVersion)</VersionPrefix>
 		<AssemblyVersion>$(MajorVersion).0.0.0</AssemblyVersion>
 		<FileVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion).0</FileVersion>

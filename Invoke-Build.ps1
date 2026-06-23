@@ -35,17 +35,17 @@ if (Test-Path $artifacts) {
 	Remove-Item $artifacts -Force -Recurse
 }
 
-$buildCommand = { & msbuild -p:Configuration=Release -p:ReleaseBuild=$ReleaseBuild }
+$buildCommand = { & msbuild -p:Configuration=Release -p:ReleaseBuild=$ReleaseBuild -p:GenerateFullPaths=true -consoleloggerparameters:NoSummary }
 # If there are any native projects in the solution, then a separate configuration created specifically for use during NuGet package creation needs to be made.
 # This configuration needs to have all native projects excluded from being built so we don't attempt to pack them. Normally, we'd assign a value of false to the
 # IsPackable element for the project, however MSBuild ignores this property and errors out anyway.
-$packCommand = { & msbuild -t:Pack -p:Configuration=$PackageConfiguration -p:PackageOutputPath=$artifacts -p:ReleaseBuild=$ReleaseBuild  }
+$packCommand = { & msbuild -t:Pack -p:Configuration=$PackageConfiguration -p:PackageOutputPath=$artifacts -p:ReleaseBuild=$ReleaseBuild -p:GenerateFullPaths=true -consoleloggerparameters:NoSummary }
 
 if ($UseMSBuildRestore) {
-	$restoreCommand = { & msbuild -t:Restore }
+	$restoreCommand = { & msbuild -t:Restore -p:GenerateFullPaths=true -consoleloggerparameters:NoSummary }
 }
 else {
-	$restoreCommand = { & dotnet restore }
+	$restoreCommand = { & dotnet restore -p:GenerateFullPaths=true -consoleloggerparameters:NoSummary }
 }
 
 $restoreCommand = AppendCommand($restoreCommand.ToString(), "/p:DisableWarnForInvalidRestoreProjects=true /p:Configuration=Release")

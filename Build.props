@@ -1,5 +1,11 @@
 <Project>
-	<PropertyGroup>
+	<PropertyGroup>				
+		<!--
+			Points to the directory above this file, which will be the consuming repository's root if the standard layout is being followed (<repo>\build\Build.props).
+			We use this path to break any dependency on $(SolutionDir), which is not always present, and can lead to strange results such as output getting written to 
+			the root of the current drive, etc.
+		-->
+		<OutputRoot Condition="'$(OutputRoot)' == ''">$([MSBuild]::EnsureTrailingSlash($([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..'))))</OutputRoot>
 		<TargetFramework>net10.0</TargetFramework>
 		<PackageId>$(MSBuildProjectName)</PackageId>
 		<RepositoryType>git</RepositoryType>
@@ -29,7 +35,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<None Include="$(SolutionDir)media\Icon.png" Pack="true" PackagePath="">
+		<None Include="$(OutputRoot)media\Icon.png" Pack="true" PackagePath="">
 			<Link>Properties\Icon.png</Link>
 		</None>
 	</ItemGroup>
@@ -38,13 +44,21 @@
 		<PackageReference Include="BadEcho.Build" Version="0.1.8" PrivateAssets="all" />
 	</ItemGroup>
 
+	<!--
+		$(Configuration) isn't defaulted until the SDK's targets are ran, way after this file is evaluated. This means the Configuration-conditioned groups will essentially be skipped
+		for builds that don't explicitly pass the build configuration as a global property.
+	-->
+	<PropertyGroup>
+		<Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
+	</PropertyGroup>
+
 	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-		<OutputPath>$(SolutionDir)\bin\dbg</OutputPath>
-		<DocumentationFile>$(SolutionDir)\bin\dbg\$(AssemblyName).xml</DocumentationFile>
+		<OutputPath>$(OutputRoot)bin\dbg</OutputPath>
+		<DocumentationFile>$(OutputRoot)bin\dbg\$(AssemblyName).xml</DocumentationFile>
 	</PropertyGroup>
 	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-		<OutputPath>$(SolutionDir)\bin\rel</OutputPath>
-		<DocumentationFile>$(SolutionDir)\bin\rel\$(AssemblyName).xml</DocumentationFile>
+		<OutputPath>$(OutputRoot)bin\rel</OutputPath>
+		<DocumentationFile>$(OutputRoot)bin\rel\$(AssemblyName).xml</DocumentationFile>
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)\strongNaming.snk</AssemblyOriginatorKeyFile>
 		<DebugType>embedded</DebugType>
@@ -55,5 +69,13 @@
 		<PropertyGroup>
 			<BuildingProject>false</BuildingProject>
 		</PropertyGroup>
+	</Target>
+
+	<!--
+		This guards against $(OutputPath) ever being pointed to the root of the current drive. While having output being written to the top-level directory is almost always going to be unwanted, this additional layer
+		of protection was added due to drive-rooted output triggering strange and unwanted behavior with a particular third party tool used by some of my projects.
+	-->
+	<Target Name="ValidateOutputPath" BeforeTargets="PrepareForBuild">				
+		<Error Condition="$(OutputPath.StartsWith('\')) OR $(OutputPath.StartsWith('/'))" Text="OutputPath points to the top-level directory of the current drive, terminating build so output isn't written to the current drive's root."/>
 	</Target>
 </Project>
